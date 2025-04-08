@@ -1,0 +1,80 @@
+
+
+services:
+  # PostgreSQL database service
+  db:
+    image: postgres:13
+    container_name: postgres
+    environment:
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${DB_NAME}
+    ports:
+      - "5432:5432"  # Expose the database on localhost
+    volumes:
+      - ./data/db:/var/lib/postgresql/data  # Persist data even if the container is removed
+    networks:
+      - backend-network
+    restart: always  
+    
+  # pgAdmin service for PostgreSQL database management
+  pgadmin:
+    image: dpage/pgadmin4
+    container_name: pgadmin
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@admin.com
+      PGADMIN_DEFAULT_PASSWORD: admin123
+    ports:
+      - "8080:80"  # Expose pgAdmin on localhost:8080
+    networks:
+      - backend-network
+    restart: always
+    depends_on:
+      - db  # Make sure pgAdmin starts after the database is ready
+
+  # Your NestJS Backend Service (Development)
+  backend-dev:
+    build:
+      context: .
+      target: development  
+    container_name: nestjs-backend-dev
+    environment:
+      DB_HOST: db  
+      DB_PORT: 5432
+      DB_USERNAME: ${DB_USER}
+      DB_PASSWORD: ${DB_PASSWORD}
+      DB_DATABASE: ${DB_NAME}
+    ports:
+      - "3000:3000" 
+    volumes:
+      - .:/usr/src/app  
+    networks:
+      - backend-network
+    # depends_on:
+    #   - db  
+
+  # Your NestJS Backend Service (Production)
+  backend-prod:
+    build:
+      context: .
+      target: production  # Reference the prod build from your Dockerfile
+    container_name: nestjs-backend-prod
+    environment:
+      DB_HOST: db
+      DB_PORT: 5432
+      DB_USERNAME: ${DB_USER}
+      DB_PASSWORD: ${DB_PASSWORD}
+      DB_DATABASE: ${DB_NAME}
+    ports:
+      - "3000:3000" 
+    networks:
+      - backend-network
+    depends_on:
+      - db  # Ensure the backend waits for the database
+
+volumes:
+  postgres-data:  # Named volume to persist PostgreSQL data
+
+networks:
+  backend-network:
+    driver: bridge
