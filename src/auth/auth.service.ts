@@ -41,12 +41,5 @@ export class AuthService {
     const { password: _p, ...safeUser } = user;
     return safeUser;
   }
-  
-
-  // async register(email: string, password: string) {
-  //   const user = await this.usersService.create(email, password);
-  //   const { password: _password, ...safeUser } = user;  // Destructure and remove password
-  //   return safeUser;
-  // }
 }
 

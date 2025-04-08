@@ -17,7 +17,15 @@ async function bootstrap() {
     .setTitle('Online store API')
     .setDescription('The Online store API documentation')
     .setVersion('1.0')
-    .addBearerAuth() // Optional if you're using JWT
+    .addBearerAuth(
+      {
+        type: 'http', // The type of authorization (can be 'http' for Bearer, 'apiKey', 'oauth2', etc.)
+        scheme: 'bearer', // The type of scheme (usually 'bearer' for JWT)
+        bearerFormat: 'JWT', // Optional: to specify the format of the token (e.g., 'JWT')
+        description: 'Please provide your JWT token for authentication', // Optional description
+      },
+      'access-token', // The name of the header (used in the UI)
+    )  
     .build();
 
   const document = SwaggerModule.createDocument(app, config);
